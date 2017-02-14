@@ -38,7 +38,7 @@ def parse_args():
                         help='optional config file', default=None, type=str)
     parser.add_argument('--wait', dest='wait',
                         help='wait until net file exists',
-                        default=True, type=bool)
+                        default=False, type=bool)
     parser.add_argument('--imdb', dest='imdb_name',
                         help='dataset to test',
                         default='voc_2007_test', type=str)
