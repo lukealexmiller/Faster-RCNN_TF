@@ -1,6 +1,6 @@
 TF_INC=$(python -c 'import tensorflow as tf; print(tf.sysconfig.get_include())')
 
-CUDA_PATH=/usr/local/cuda/
+#CUDA_PATH=/usr/local/cuda/
 CXXFLAGS=''
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
@@ -18,8 +18,9 @@ if [ -d "$CUDA_PATH" ]; then
 		roi_pooling_op.cu.o -I $TF_INC  -D GOOGLE_CUDA=1 -fPIC $CXXFLAGS \
 		-lcudart -L $CUDA_PATH/lib64
 else
+	echo "I'm here"
 	g++ -std=c++11 -shared -o roi_pooling.so roi_pooling_op.cc \
-		-I $TF_INC -fPIC $CXXFLAGS
+		-I "/Users/LukeMiller/anaconda/envs/python2/lib/python2.7/site-packages/tensorflow/include" -fPIC $CXXFLAGS
 fi
 
 cd ..
