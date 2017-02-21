@@ -59,7 +59,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def freeze_graph(model_path,model_file):
+def freeze_graph(network_name,model_path,model_file):
     # We retrieve our checkpoint fullpath
     #checkpoint = tf.train.get_checkpoint_state(model_path,model_file)
     #input_checkpoint = checkpoint.model_checkpoint_path
@@ -67,17 +67,19 @@ def freeze_graph(model_path,model_file):
     print(input_checkpoint)
     # We precise the file fullname of our freezed graph
     #absolute_model_path = "/".join(input_checkpoint.split('/')[:-1])
-    output_graph = absolute_model_path + os.path.splitext(model_file) + ".pb"
+    output_graph = model_path + os.path.splitext(model_file) + ".pb"
     print(output_graph)
     # Before exporting our graph, we need to specify our output nodes
     # This is how TF decides what part of the Graph he has to keep and what part it can dump
     # NOTE: this variable is plural, because you can have multiple output nodes
-    output_node_names = ('cls_prob','bbox_pred')
+    output_node_names = "cls_prob,bbox_pred"
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
-    
+    network = get_network(network_name)
+    init = tf.global_variables_initializer()
     # We import the meta graph and retrieve a Saver
+    
     saver = tf.train.import_meta_graph(input_checkpoint + '.meta', clear_devices=clear_devices)
 
     # We retrieve the protobuf graph definition
@@ -86,9 +88,10 @@ def freeze_graph(model_path,model_file):
 
     # We start a session and restore the graph weights
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+        sess.run(init)
         saver.restore(sess, input_checkpoint)
 
-        print ('Loading model weights from {:s}').format(args.model)
+        print ('Loading model weights from {:s}').format(input_checkpoint)
 
         # We use a built-in TF helper to export variables to constants
         output_graph_def = graph_util.convert_variables_to_constants(
@@ -118,4 +121,4 @@ if __name__ == '__main__':
         print('Waiting for {} to exist...'.format(args.model_path))
         time.sleep(10)
 
-    freeze_graph(args.model_path,args.model_file)
+    freeze_graph(args.network_name,args.model_path,args.model_file)
