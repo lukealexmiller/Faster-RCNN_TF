@@ -100,7 +100,7 @@ if __name__ == '__main__':
     filename = os.path.splitext(args.model)[0] + '.pb'
     output_dir = get_output_dir(imdb, None)
 
-    #tf.train.write_graph(sess.graph_def, output_dir, filename, False)
+    tf.train.write_graph(sess.graph_def, output_dir, "test.pb", False)
     print 'Wrote ProtoBuf to: {:s}'.format(output_dir)
 
     
