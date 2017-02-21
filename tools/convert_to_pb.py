@@ -94,9 +94,9 @@ def freeze_graph(network_name,model_path,model_file):
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         #sess.run(init)
         saver.restore(sess, input_checkpoint)
-
         print ('Loading model weights from {:s}').format(input_checkpoint)
-
+        [n.name for n in tf.get_default_graph().as_graph_def().node]
+        print(n.name)
         # We use a built-in TF helper to export variables to constants
         output_graph_def = graph_util.convert_variables_to_constants(
             sess, # The session is used to retrieve the weights
