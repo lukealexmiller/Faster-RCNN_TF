@@ -72,7 +72,7 @@ def freeze_graph(network_name,model_path,model_file):
     # Before exporting our graph, we need to specify our output nodes
     # This is how TF decides what part of the Graph he has to keep and what part it can dump
     # NOTE: this variable is plural, because you can have multiple output nodes
-    output_node_names = "cls_prob,bbox_pred"
+    output_node_names = "cls_prob"
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
@@ -95,7 +95,7 @@ def freeze_graph(network_name,model_path,model_file):
         #sess.run(init)
         saver.restore(sess, input_checkpoint)
         print ('Loading model weights from {:s}').format(input_checkpoint)
-        [n.name for n in tf.get_default_graph().as_graph_def().node]
+        #[n.name for n in tf.get_default_graph().as_graph_def().node]
         print(output_node_names.split(","))
         # We use a built-in TF helper to export variables to constants
         output_graph_def = graph_util.convert_variables_to_constants(
