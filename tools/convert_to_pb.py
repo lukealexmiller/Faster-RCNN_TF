@@ -101,6 +101,6 @@ if __name__ == '__main__':
     output_dir = get_output_dir(imdb, None)
 
     #tf.train.write_graph(sess.graph_def, output_dir, filename, False)
-    print 'Wrote ProtoBuf to: {:s}'.format(filename)
+    print 'Wrote ProtoBuf to: {:s}'.format(output_dir)
 
     
