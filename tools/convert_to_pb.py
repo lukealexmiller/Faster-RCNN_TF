@@ -78,15 +78,15 @@ def freeze_graph(network_name,model_path,model_file):
 
     saver = tf.train.Saver()
     # We retrieve the protobuf graph definition
-    graph = tf.get_default_graph()
-    input_graph_def = graph.as_graph_def()
+    #graph = tf.get_default_graph()
+    #input_graph_def = graph.as_graph_def()
 
     # We start a session and restore the graph weights
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         #sess.run(init)
         saver.restore(sess, input_checkpoint)
         print ('Loading model weights from {:s}').format(input_checkpoint)
-
+        input_graph_def = sess.graph.as_graph_def()
         # We use a built-in TF helper to export variables to constants
         output_graph_def = graph_util.convert_variables_to_constants(
             sess, # The session is used to retrieve the weights
