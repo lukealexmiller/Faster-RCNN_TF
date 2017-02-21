@@ -10,9 +10,7 @@
 """Test a Fast R-CNN network on an image database."""
 
 import _init_paths
-from fast_rcnn.test import test_net
-from fast_rcnn.config import cfg, cfg_from_file, get_output_dir
-from datasets.factory import get_imdb
+from fast_rcnn.config import cfg, cfg_from_file
 from networks.factory import get_network
 import argparse
 import pprint
@@ -59,7 +57,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def freeze_graph(network_name,model_path,model_file):
+def export_graph(network_name,model_path,model_file):
     # Define full path and filename of input checkpoint
     input_checkpoint = model_path + model_file
     # Define full path and filename of output protobuf file
@@ -68,7 +66,7 @@ def freeze_graph(network_name,model_path,model_file):
     # Before exporting our graph, we need to specify our output nodes
     # This is how TF decides what part of the Graph he has to keep and what part it can dump
     # NOTE: this variable is plural, because you can have multiple output nodes
-    output_node_names = "bbox_pred"
+    output_node_names = "cls_prob, bbox_pred/bbox_pred"
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
@@ -77,16 +75,19 @@ def freeze_graph(network_name,model_path,model_file):
     print 'Use network `{:s}` in training'.format(args.network_name)
 
     saver = tf.train.Saver()
-    # We retrieve the protobuf graph definition
-    #graph = tf.get_default_graph()
-    #input_graph_def = graph.as_graph_def()
-
+    
     # We start a session and restore the graph weights
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        #sess.run(init)
         saver.restore(sess, input_checkpoint)
         print ('Loading model weights from {:s}').format(input_checkpoint)
+        
+        # We retrieve the protobuf graph definition
         input_graph_def = sess.graph.as_graph_def()
+
+        # Display names of nodes in graph (useful for debugging)
+        for v in sess.graph.get_operations():
+            print(v.name)
+
         # We use a built-in TF helper to export variables to constants
         output_graph_def = graph_util.convert_variables_to_constants(
             sess, # The session is used to retrieve the weights
@@ -116,4 +117,4 @@ if __name__ == '__main__':
         print('Waiting for {} to exist...'.format(args.model_path+args.model_file))
         time.sleep(10)
 
-    freeze_graph(args.network_name,args.model_path,args.model_file)
+    export_graph(args.network_name,args.model_path,args.model_file)
