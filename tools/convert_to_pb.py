@@ -67,7 +67,7 @@ def freeze_graph(network_name,model_path,model_file):
     print(input_checkpoint)
     # We precise the file fullname of our freezed graph
     #absolute_model_path = "/".join(input_checkpoint.split('/')[:-1])
-    output_graph = model_path + os.path.splitext(model_file) + ".pb"
+    output_graph = model_path + os.path.splitext(model_file)[0] + ".pb"
     print(output_graph)
     # Before exporting our graph, we need to specify our output nodes
     # This is how TF decides what part of the Graph he has to keep and what part it can dump
