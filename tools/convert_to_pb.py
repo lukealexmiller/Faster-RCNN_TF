@@ -29,11 +29,11 @@ def parse_args():
                         default='cpu', type=str)
     parser.add_argument('--device_id', dest='device_id', help='device id to use',
                         default=0, type=int)
-    parser.add_argument('--def', dest='prototxt',
-                        help='prototxt file defining the network',
+    parser.add_argument('--model_path', dest='model_path',
+                        help='checkpoint file directory',
                         default=None, type=str)
-    parser.add_argument('--weights', dest='model',
-                        help='model to test',
+    parser.add_argument('--model_file', dest='model_file',
+                        help='model to convert',
                         default=None, type=str)
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file', default=None, type=str)
@@ -59,14 +59,14 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def freeze_graph(model_folder):
+def freeze_graph(model_path,model_file):
     # We retrieve our checkpoint fullpath
-    checkpoint = tf.train.get_checkpoint_state(model_folder)
+    checkpoint = tf.train.get_checkpoint_state(model_path,model_file)
     input_checkpoint = checkpoint.model_checkpoint_path
     
     # We precise the file fullname of our freezed graph
-    absolute_model_folder = "/".join(input_checkpoint.split('/')[:-1])
-    output_graph = absolute_model_folder + "/frozen_model.pb"
+    absolute_model_path = "/".join(input_checkpoint.split('/')[:-1])
+    output_graph = absolute_model_path + "/frozen_model.pb"
 
     # Before exporting our graph, we need to specify our output nodes
     # This is how TF decides what part of the Graph he has to keep and what part it can dump
@@ -113,9 +113,9 @@ if __name__ == '__main__':
     print('Using config:')
     pprint.pprint(cfg)
 
-    while not os.path.exists(args.model) and args.wait:
-        print('Waiting for {} to exist...'.format(args.model))
+    while not os.path.exists(args.model_path) and args.wait:
+        print('Waiting for {} to exist...'.format(args.model_path))
         time.sleep(10)
 
-    freeze_graph(args.model)
+    freeze_graph(args.model_path,args.model_file)
     
