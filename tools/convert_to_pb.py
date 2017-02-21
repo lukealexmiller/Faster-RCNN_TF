@@ -76,19 +76,23 @@ def freeze_graph(network_name,model_path,model_file):
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
+
     network = get_network(network_name)
-    init = tf.global_variables_initializer()
+    print 'Use network `{:s}` in training'.format(args.network_name)
+
+    #init = tf.global_variables_initializer()
     # We import the meta graph and retrieve a Saver
     
-    saver = tf.train.import_meta_graph(input_checkpoint + '.meta', clear_devices=clear_devices)
+    #saver = tf.train.import_meta_graph(input_checkpoint + '.meta', clear_devices=clear_devices)
 
+    saver = tf.train.Saver()
     # We retrieve the protobuf graph definition
     graph = tf.get_default_graph()
     input_graph_def = graph.as_graph_def()
 
     # We start a session and restore the graph weights
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        sess.run(init)
+        #sess.run(init)
         saver.restore(sess, input_checkpoint)
 
         print ('Loading model weights from {:s}').format(input_checkpoint)
