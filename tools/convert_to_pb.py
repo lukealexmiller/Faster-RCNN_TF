@@ -61,17 +61,18 @@ def parse_args():
 
 def freeze_graph(model_path,model_file):
     # We retrieve our checkpoint fullpath
-    checkpoint = tf.train.get_checkpoint_state(model_path,model_file)
-    input_checkpoint = checkpoint.model_checkpoint_path
-    
+    #checkpoint = tf.train.get_checkpoint_state(model_path,model_file)
+    #input_checkpoint = checkpoint.model_checkpoint_path
+    input_checkpoint = model_path+model_file
+    print(input_checkpoint)
     # We precise the file fullname of our freezed graph
-    absolute_model_path = "/".join(input_checkpoint.split('/')[:-1])
-    output_graph = absolute_model_path + "/frozen_model.pb"
-
+    #absolute_model_path = "/".join(input_checkpoint.split('/')[:-1])
+    output_graph = absolute_model_path + os.path.splitext(model_file) + ".pb"
+    print(output_graph)
     # Before exporting our graph, we need to specify our output nodes
     # This is how TF decides what part of the Graph he has to keep and what part it can dump
     # NOTE: this variable is plural, because you can have multiple output nodes
-    output_node_names = "Accuracy/predictions"
+    output_node_names = ('cls_prob','bbox_pred')
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
@@ -118,4 +119,3 @@ if __name__ == '__main__':
         time.sleep(10)
 
     freeze_graph(args.model_path,args.model_file)
-    
