@@ -63,10 +63,10 @@ def export_graph(network_name,model_path,model_file):
     # Define full path and filename of output protobuf file
     output_graph = model_path + os.path.splitext(model_file)[0] + ".pb"
 
-    # Before exporting our graph, we need to specify our output nodes
-    # This is how TF decides what part of the Graph he has to keep and what part it can dump
+    # Before exporting, we need to specify our output nodes
+    # This is how TF decides what part of the graph has to keep and what part it can dump
     # NOTE: this variable is plural, because you can have multiple output nodes
-    output_node_names = "cls_prob, bbox_pred/bbox_pred"
+    output_node_names = ['cls_prob', 'bbox_pred/bbox_pred']
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
@@ -88,17 +88,22 @@ def export_graph(network_name,model_path,model_file):
         for v in sess.graph.get_operations():
             print(v.name)
 
-        # We use a built-in TF helper to export variables to constants
+        # Export variables as constants
         output_graph_def = graph_util.convert_variables_to_constants(
             sess, # The session is used to retrieve the weights
             input_graph_def, # The graph_def is used to retrieve the nodes
-            output_node_names.split(",") # The output node names are used to select the useful nodes
+            output_node_names # The output node names are used to select the useful nodes
         )
-        print('Saving output node names: {:s}').format(output_node_names.split(","))
+        print('Saving output node names: {:s}').format(output_node_names)
 
         # Finally we serialize and dump the output graph to the filesystem
         with tf.gfile.GFile(output_graph, "wb") as f:
             f.write(output_graph_def.SerializeToString())
+
+        with gfile.FastGFile(output_graph, 'wb') as f:
+            f.write(output_graph_def.SerializeToString())
+        with gfile.FastGFile(output_labels, 'w') as f:
+            f.write('\n'.join(image_lists.keys()) + '\n')
         print("%d ops in the final graph." % len(output_graph_def.node))
 
 if __name__ == '__main__':
