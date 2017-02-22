@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-"""Freeze a Fast R-CNN network and export to ProtoBuf file for use in deployment."""
+"""
+Freeze a Fast R-CNN network and export to ProtoBuf file for use in deployment.
+Example call: python tools/freeze_graph.py --device GPU --device_id 0 --model_path /root/faster_rcnn/output/BSKT_VGG16/voc_2007_trainval/ --model_file VGGnet_fast_rcnn_iter_20000.ckpt --cfg experiments/cfgs/faster_rcnn_end2end.yml --network VGGnet_test
+"""
 
 import _init_paths
 from fast_rcnn.config import cfg, cfg_from_file
+#cfg.USE_GPU_NMS = False
 from networks.factory import get_network
 import argparse
 import pprint
@@ -55,7 +59,7 @@ def export_graph(network_name,model_path,model_file):
     output_node_names = ['cls_prob', 'bbox_pred/bbox_pred']
 
     network = get_network(network_name)
-    print 'Use network `{:s}` in training'.format(args.network_name)
+    print 'Using network: `{:s}`'.format(args.network_name)
 
     saver = tf.train.Saver()
     
@@ -102,9 +106,6 @@ if __name__ == '__main__':
 
     device_name = '/{}:{:d}'.format(args.device,args.device_id)
     print device_name
-
-    network = get_network(args.network_name)
-    print 'Use network `{:s}` in training'.format(args.network_name)
 
     if args.device == 'gpu':
         cfg.USE_GPU_NMS = True
