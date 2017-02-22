@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 
-# --------------------------------------------------------
-# Fast R-CNN
-# Copyright (c) 2015 Microsoft
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Ross Girshick
-# --------------------------------------------------------
-
-"""Test a Fast R-CNN network on an image database."""
+"""Freeze a Fast R-CNN network and export to ProtoBuf file for use in deployment."""
 
 import _init_paths
 from fast_rcnn.config import cfg, cfg_from_file
@@ -38,11 +31,6 @@ def parse_args():
     parser.add_argument('--wait', dest='wait',
                         help='wait until net file exists',
                         default=False, type=bool)
-    parser.add_argument('--imdb', dest='imdb_name',
-                        help='dataset to test',
-                        default='voc_2007_test', type=str)
-    parser.add_argument('--comp', dest='comp_mode', help='competition mode',
-                        action='store_true')
     parser.add_argument('--network', dest='network_name',
                         help='name of the network',
                         default=None, type=str)
@@ -58,18 +46,13 @@ def parse_args():
     return args
 
 def export_graph(network_name,model_path,model_file):
-    # Define full path and filename of input checkpoint
+    # Define full path and filename of input checkpoint file
     input_checkpoint = model_path + model_file
     # Define full path and filename of output protobuf file
     output_graph = model_path + os.path.splitext(model_file)[0] + ".pb"
 
-    # Before exporting, we need to specify our output nodes
-    # This is how TF decides what part of the graph has to keep and what part it can dump
-    # NOTE: this variable is plural, because you can have multiple output nodes
+    # List of name strings for desired result nodes of graph
     output_node_names = ['cls_prob', 'bbox_pred/bbox_pred']
-
-    # We clear devices to allow TensorFlow to control on which device it will load operations
-    clear_devices = True
 
     network = get_network(network_name)
     print 'Use network `{:s}` in training'.format(args.network_name)
@@ -92,18 +75,13 @@ def export_graph(network_name,model_path,model_file):
         output_graph_def = graph_util.convert_variables_to_constants(
             sess, # The session is used to retrieve the weights
             input_graph_def, # The graph_def is used to retrieve the nodes
-            output_node_names # The output node names are used to select the useful nodes
+            output_node_names # The output node names are used to define the useful nodes
         )
         print('Saving output node names: {:s}').format(output_node_names)
 
         # Finally we serialize and dump the output graph to the filesystem
-        with tf.gfile.GFile(output_graph, "wb") as f:
+        with tf.gfile.FastGFile(output_graph, 'wb') as f:
             f.write(output_graph_def.SerializeToString())
-
-        with gfile.FastGFile(output_graph, 'wb') as f:
-            f.write(output_graph_def.SerializeToString())
-        with gfile.FastGFile(output_labels, 'w') as f:
-            f.write('\n'.join(image_lists.keys()) + '\n')
         print("%d ops in the final graph." % len(output_graph_def.node))
 
 if __name__ == '__main__':
@@ -121,5 +99,17 @@ if __name__ == '__main__':
     while not os.path.exists(args.model_path) and args.wait:
         print('Waiting for {} to exist...'.format(args.model_path+args.model_file))
         time.sleep(10)
+
+    device_name = '/{}:{:d}'.format(args.device,args.device_id)
+    print device_name
+
+    network = get_network(args.network_name)
+    print 'Use network `{:s}` in training'.format(args.network_name)
+
+    if args.device == 'gpu':
+        cfg.USE_GPU_NMS = True
+        cfg.GPU_ID = args.device_id
+    else:
+        cfg.USE_GPU_NMS = False
 
     export_graph(args.network_name,args.model_path,args.model_file)
