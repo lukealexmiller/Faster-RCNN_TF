@@ -30,7 +30,8 @@ class pascal_voc(imdb):
                             else devkit_path
         self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
         self._classes = ('__background__', # always index 0
-                         'empty_basket', 'full_basket')
+                         'empty_basket', 'full_basket',
+                         'empty_cart', 'full_cart')
 #                         'aeroplane', 'bicycle', 'bird', 'boat',
 #                         'bottle', 'bus', 'car', 'cat', 'chair',
 #                         'cow', 'diningtable', 'dog', 'horse',
