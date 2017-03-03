@@ -4,3 +4,4 @@
 faster_rcnn_models
 output/
 tools/.ipynb_checkpoints
+data/
